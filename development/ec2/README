@@ -1,0 +1,9 @@
+ec2
+
+As we all are new to Amazon web services, we will need to do some research before deciding exactly what to put in here.
+
+My first suggest would be to separate tiers - Web tier, Business tier, and Data tier.
+
+Christos, Saleh, and Mohammed shall lead the ec2 work initially.
+
+Andy

@@ -1,0 +1,8 @@
+This will be the main folder for our software development.
+As we will all be using the (master) branch by default, I suggest that we use a (release) branch when we're ready to tag a product version and hand it over to the customer.
+We should also use branches for our own work, be it bug fixes or feature additions. 
+Commit each piece of work separately, don't commit more than one bug fix or feature at a time, it'll help with historical tracking.
+
+I will formalise this in Development Procedures.docx as well as what documents we need to support our development work. As always, nothing is set in stone and if you disagree with something say so, or if you wish to add something go for it!
+
+Andy
