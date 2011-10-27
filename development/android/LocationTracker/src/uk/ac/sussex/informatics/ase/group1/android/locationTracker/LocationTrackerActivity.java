@@ -1,6 +1,7 @@
 package uk.ac.sussex.informatics.ase.group1.android.locationTracker;
 
 import java.text.DateFormat;
+import java.util.TimeZone;
 
 import android.app.Activity;
 import android.content.Context;
@@ -25,7 +26,8 @@ public class LocationTrackerActivity extends Activity {
 	
 	private TextView latitude, longitude, gpsTime;
 	private CharSequence latitudeText, longitudeText;
-	private DateFormat dateFormat = DateFormat.getInstance();
+	private DateFormat dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
+	private TimeZone tz = TimeZone.getTimeZone("UTC");
 	
     /**
      * Find the text views and use a location manager to get location updates 
@@ -47,6 +49,8 @@ public class LocationTrackerActivity extends Activity {
 	    lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);    
 	    ll = new GPSLocationListener(); 
 		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);
+		
+		dateFormat.setTimeZone(tz);
     }
     
     @Override
