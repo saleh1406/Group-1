@@ -8,12 +8,14 @@ import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.widget.TextView;
 
 /**
  * Prints the users location, latitude and longitude, as well as the GPS time in UTC format in a simple
- * linear layout activity.
+ * linear layout activity..
  * 
  * @author Andy Keavey
  * @version 0.01
@@ -29,6 +31,8 @@ public class LocationTrackerActivity extends Activity {
 	private DateFormat dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
 	private TimeZone tz = TimeZone.getTimeZone("UTC");
 	
+	private NetworkConn nc;
+	
     /**
      * Find the text views and use a location manager to get location updates 
      */
@@ -38,7 +42,7 @@ public class LocationTrackerActivity extends Activity {
         setContentView(R.layout.main);
         
         /*
-         * To support multiple languages, we get the string set by the String resource file.
+         * To support multiple languages, we get the string set by the String resource file..
          */
         latitude = (TextView) findViewById(R.id.user_latitude);
         longitude = (TextView) findViewById(R.id.user_longitude); 
@@ -51,12 +55,17 @@ public class LocationTrackerActivity extends Activity {
 		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);
 		
 		dateFormat.setTimeZone(tz);
+		//isNetworkAvailable();
+    	nc = new NetworkConn();
+    	Thread connThread = new Thread(nc);
+    	connThread.start();
     }
     
     @Override
     protected void onStart() {
     	super.onStart();
     	//do nothing
+
     }
     
     @Override
@@ -78,13 +87,14 @@ public class LocationTrackerActivity extends Activity {
     protected void onStop() {
     	super.onStop();
     	lm.removeUpdates(ll);
+    	//nc.closeConnection();
     }
     
     /*
      * The setText method must be called from within the Activity class containing the target TextView
      * This code could be put in a handler.
      * We use the GPS time (UTC) as it will be standard in all locations, system time is displayed on the
-     * phone's status bar anyway.
+     * phone's status bar anyway..
      */
     private void showLocation(Location location) {    
         latitude.setText(latitudeText + " " + location.getLatitude());
@@ -92,14 +102,35 @@ public class LocationTrackerActivity extends Activity {
         gpsTime.setText("UTC: " + dateFormat.format(location.getTime()));
     }
     
+	/*
+	 * Adapted from example by
+	 * @author Lars Vogel.
+	 */
+	public void isNetworkAvailable() {
+		String text;
+	    //ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+	    //NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+	    // if no network is available networkInfo will be null, otherwise check if we are connected
+	    //if (networkInfo != null && networkInfo.isConnected()) {
+	    if (true) {
+		text = "Connected";
+	    } else {
+	    	text = "No connection";
+	    }
+	    TextView netState = (TextView) findViewById(R.id.netState);
+	    netState.setText("Network state: " + text);
+	    
+	}
+	
     /**
      * Inner class responsible for getting information about the users location.
      * @author Andy
-     *
+     *.
      */
     class GPSLocationListener implements LocationListener {
     	public void onLocationChanged(Location location) {
     		showLocation(location);
+
     	}
     	
     	public void onStatusChanged(String provider, int status, Bundle extras) {

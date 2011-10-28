@@ -25,4 +25,11 @@
     android:text="@string/gpsTime"
     android:textStyle="bold"
     />
+<TextView  
+	android:id="@+id/netState"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:text="@string/network"
+    android:textStyle="bold"
+    />
 </LinearLayout>

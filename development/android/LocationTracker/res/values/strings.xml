@@ -2,7 +2,8 @@
 <resources>
     <string name="app_name">LocationTracker</string>
     
-    <string name="latitude">Latitude: </string>
+    <string name="latitude">Latitude: xxx </string>
     <string name="longitude">Longitude: </string>
     <string name="gpsTime">UTC: </string>
+    <string name="network">Network state: </string>
 </resources>

@@ -15,6 +15,7 @@ public final class R {
     }
     public static final class id {
         public static final int gps_time=0x7f050002;
+        public static final int netState=0x7f050003;
         public static final int user_latitude=0x7f050000;
         public static final int user_longitude=0x7f050001;
     }
@@ -26,5 +27,6 @@ public final class R {
         public static final int gpsTime=0x7f040003;
         public static final int latitude=0x7f040001;
         public static final int longitude=0x7f040002;
+        public static final int network=0x7f040004;
     }
 }
