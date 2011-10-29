@@ -1,16 +1,12 @@
 package uk.ac.sussex.informatics.ase.group1.android.locationTracker;
 
-import java.text.DateFormat;
-import java.util.TimeZone;
-
 import android.app.Activity;
 import android.content.Context;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.widget.TextView;
 
 /**
@@ -22,16 +18,27 @@ import android.widget.TextView;
  *
  */
 public class LocationTrackerActivity extends Activity {
-	
-	private LocationListener ll;
-	private LocationManager lm;
-	
+
 	private TextView latitude, longitude, gpsTime;
-	private CharSequence latitudeText, longitudeText;
-	private DateFormat dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
-	private TimeZone tz = TimeZone.getTimeZone("UTC");
 	
+	private GPSConnection gpsConnection;
 	private NetworkConn nc;
+	
+	private Handler handler = new Handler() {
+		public void handleMessage(Message m) {
+			Bundle dataBundle = m.getData();
+			GPSData gpsData = (GPSData) dataBundle.getSerializable("gpsData");
+	        latitude = (TextView) findViewById(R.id.user_latitude);
+	        longitude = (TextView) findViewById(R.id.user_longitude); 
+	        gpsTime = (TextView) findViewById(R.id.gps_time);
+	        
+	        latitude.setText("Latitude: " + gpsData.getLatitude());
+	        longitude.setText("Longitude: " + gpsData.getLongitude());
+	        gpsTime.setText("UTC: " + gpsData.getTime());
+	        
+	        nc.sendData(gpsData.toString());
+		}
+	};
 	
     /**
      * Find the text views and use a location manager to get location updates 
@@ -40,44 +47,28 @@ public class LocationTrackerActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
-        /*
-         * To support multiple languages, we get the string set by the String resource file..
-         */
-        latitude = (TextView) findViewById(R.id.user_latitude);
-        longitude = (TextView) findViewById(R.id.user_longitude); 
-        gpsTime = (TextView) findViewById(R.id.gps_time);       
-        latitudeText = latitude.getText();
-        longitudeText = longitude.getText();
-        
-	    lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);    
-	    ll = new GPSLocationListener(); 
-		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);
-		
-		dateFormat.setTimeZone(tz);
-		//isNetworkAvailable();
-    	nc = new NetworkConn();
-    	Thread connThread = new Thread(nc);
-    	connThread.start();
+
+        gpsConnection = new GPSConnection(this, handler);
+        contactServer();
+
     }
     
     @Override
     protected void onStart() {
     	super.onStart();
-    	//do nothing
+    	gpsConnection.startListening();
 
     }
     
     @Override
     protected void onPause() {
     	super.onPause();
-    	//lm.removeUpdates(ll);
     }
     
     @Override
     protected void onResume() {
     	super.onResume();
-    	lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);
+    	gpsConnection.startListening();
     }
     
     /**
@@ -86,63 +77,34 @@ public class LocationTrackerActivity extends Activity {
     @Override
     protected void onStop() {
     	super.onStop();
-    	lm.removeUpdates(ll);
-    	//nc.closeConnection();
+    	gpsConnection.stopListening();
     }
     
-    /*
-     * The setText method must be called from within the Activity class containing the target TextView
-     * This code could be put in a handler.
-     * We use the GPS time (UTC) as it will be standard in all locations, system time is displayed on the
-     * phone's status bar anyway..
-     */
-    private void showLocation(Location location) {    
-        latitude.setText(latitudeText + " " + location.getLatitude());
-        longitude.setText(longitudeText + " " + location.getLongitude());
-        gpsTime.setText("UTC: " + dateFormat.format(location.getTime()));
+    private void contactServer() {
+    	if (isNetworkAvailable()) {
+        	nc = new NetworkConn();
+        	Thread connThread = new Thread(nc);
+        	connThread.start();
+    	}
     }
     
 	/*
 	 * Adapted from example by
 	 * @author Lars Vogel.
 	 */
-	public void isNetworkAvailable() {
-		String text;
-	    //ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-	    //NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+	public boolean isNetworkAvailable() {
+		TextView netState = (TextView) findViewById(R.id.netState);
+		
+	    ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+	    NetworkInfo networkInfo = cm.getActiveNetworkInfo();
 	    // if no network is available networkInfo will be null, otherwise check if we are connected
-	    //if (networkInfo != null && networkInfo.isConnected()) {
-	    if (true) {
-		text = "Connected";
+	    if (networkInfo != null && networkInfo.isConnected()) {
+	    		netState.setText("Network state: connected");
+	    		return true;
 	    } else {
-	    	text = "No connection";
-	    }
-	    TextView netState = (TextView) findViewById(R.id.netState);
-	    netState.setText("Network state: " + text);
-	    
+	    	netState.setText("Network state: disconnected");
+	    	return false;
+	    }	    
 	}
 	
-    /**
-     * Inner class responsible for getting information about the users location.
-     * @author Andy
-     *.
-     */
-    class GPSLocationListener implements LocationListener {
-    	public void onLocationChanged(Location location) {
-    		showLocation(location);
-
-    	}
-    	
-    	public void onStatusChanged(String provider, int status, Bundle extras) {
-    		
-    	}
-    	
-    	public void onProviderEnabled(String provider) {
-    		
-    	}
-    	
-    	public void onProviderDisabled(String provider) {
-    		
-    	}
-    } //end inner class GPSLocationListener
 }

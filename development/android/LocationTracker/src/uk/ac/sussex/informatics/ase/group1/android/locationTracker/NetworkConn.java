@@ -15,7 +15,7 @@ import android.net.NetworkInfo;
 /**
  * Adapted from Open University coursework for M257, completed by:
  * @author Andy
- *
+ * .
  */
 public class NetworkConn implements Runnable {
 
@@ -29,9 +29,14 @@ public class NetworkConn implements Runnable {
 		
 	}
 	
+	public NetworkConn(String hostname) {
+		host = hostname;	
+	}
+	
+	
 	public void openConnection() throws IOException {
-		Socket socket = new Socket(host, PORT);
 		
+		Socket socket = new Socket(host, PORT);	
 		
 		//Create input stream for handshaking
 		InputStream is = socket.getInputStream();
@@ -50,9 +55,10 @@ public class NetworkConn implements Runnable {
 		}
 	}
 	
-	public void sendData(int theData) {
-		toServer.println("OPEN ");
-		toServer.println("" + theData);
+	public void sendData(String theData) {
+		if (toServer!=null) {
+			toServer.println(theData);
+		} 
 	}
 	
 	public String readResponse() {
@@ -65,11 +71,7 @@ public class NetworkConn implements Runnable {
 		
 		try {
 			openConnection();
-			Thread.sleep(5000);
-			sendData(1234);
 		} catch (IOException ex) {
-			
-		} catch (InterruptedException ex) {
 			
 		}
 		//closeConnection();
