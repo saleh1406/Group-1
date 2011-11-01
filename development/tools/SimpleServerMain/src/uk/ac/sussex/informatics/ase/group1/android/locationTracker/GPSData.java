@@ -1,4 +1,4 @@
-package simpleservermain;
+package uk.ac.sussex.informatics.ase.group1.android.locationTracker;
 
 import java.io.Serializable;
 
