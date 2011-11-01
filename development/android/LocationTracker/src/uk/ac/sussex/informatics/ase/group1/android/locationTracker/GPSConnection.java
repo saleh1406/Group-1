@@ -19,6 +19,7 @@ public class GPSConnection {
 	private DateFormat dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
 	private TimeZone tz = TimeZone.getTimeZone("UTC");
 	private Handler handler;
+	private int minTimeMinutes = 10;
 	
 	public GPSConnection(Context context, Handler aHandler) {
 		handler = aHandler;
@@ -29,7 +30,7 @@ public class GPSConnection {
 	}
 	
 	public void startListening() {
-		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, ll);
+		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTimeMinutes * 60000, 0, ll);
 	}
 	
 	public void stopListening() {

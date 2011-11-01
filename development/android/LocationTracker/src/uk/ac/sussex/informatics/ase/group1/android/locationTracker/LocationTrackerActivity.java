@@ -7,6 +7,8 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 /**
@@ -19,12 +21,16 @@ import android.widget.TextView;
  */
 public class LocationTrackerActivity extends Activity {
 
+	public static final int INSERT_ID = Menu.FIRST;
+	
 	private TextView latitude, longitude, gpsTime;
 	
 	private GPSConnection gpsConnection;
-	private NetworkConn nc;
+	private ObjectNetworkConnection onc;
+	private PrintNetworkConnection pnc;
 	
 	private Handler handler = new Handler() {
+		@Override
 		public void handleMessage(Message m) {
 			Bundle dataBundle = m.getData();
 			GPSData gpsData = (GPSData) dataBundle.getSerializable("gpsData");
@@ -36,7 +42,10 @@ public class LocationTrackerActivity extends Activity {
 	        longitude.setText("Longitude: " + gpsData.getLongitude());
 	        gpsTime.setText("UTC: " + gpsData.getTime());
 	        
-	        nc.sendData(gpsData.toString());
+	        if (onc!=null) {
+	        	pnc.sendData(gpsData.toString());
+	        	onc.sendObject(gpsData);
+	        }
 		}
 	};
 	
@@ -49,8 +58,26 @@ public class LocationTrackerActivity extends Activity {
         setContentView(R.layout.main);
 
         gpsConnection = new GPSConnection(this, handler);
-        contactServer();
+        contactObjectServer();
+        contactPrintServer();
 
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+    	boolean result = super.onCreateOptionsMenu(menu);
+    	menu.add(0, INSERT_ID, 0, R.string.menu_item);
+    	return result;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	if (INSERT_ID==item.getItemId()) {
+    		//launch spinner/input to select server ip address
+    		return true;
+    	}
+    	
+    	return super.onOptionsItemSelected(item);
     }
     
     @Override
@@ -80,15 +107,23 @@ public class LocationTrackerActivity extends Activity {
     	gpsConnection.stopListening();
     }
     
-    private void contactServer() {
+    private void contactObjectServer() {
     	if (isNetworkAvailable()) {
-        	nc = new NetworkConn();
-        	Thread connThread = new Thread(nc);
+        	onc = new ObjectNetworkConnection();
+        	Thread connThread = new Thread(onc);
         	connThread.start();
     	}
     }
     
-	/*
+    private void contactPrintServer() {
+    	if (isNetworkAvailable()) {
+    		pnc = new PrintNetworkConnection();
+    		Thread connThread = new Thread(pnc);
+    		connThread.start();
+    	}
+    }
+    
+	/**
 	 * Adapted from example by
 	 * @author Lars Vogel.
 	 */
